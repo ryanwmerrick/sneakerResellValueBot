@@ -16,7 +16,7 @@ def similar(a, b):
 def getLivePriceGoogle(name:str, productID: str, colorway:str):
     
     
-    service = Service(executable_path="./chromedriver")
+    service = Service()
 
     #Makes Chrome Undetectable and Not Visible
     options = Options()

@@ -10,7 +10,7 @@ import os
 import requests
 
 def getLivePriceImageSoleRetreiver(productID: str, save_dir="images"):
-    service = Service(executable_path="./chromedriver")
+    service = Service()
 
     #Makes Chrome Undetectable and Not Visible
     options = Options()
