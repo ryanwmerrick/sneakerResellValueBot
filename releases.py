@@ -12,7 +12,7 @@ def getReleases():
     soup= BeautifulSoup(response.content, 'html.parser')
 
     #gets tomorrow's date to compare against the release dates
-    tomorrow = datetime.now() + timedelta(days=2)
+    tomorrow = datetime.now() + timedelta(days=1)
     tomorrow_str = tomorrow.strftime('%B %-d, %Y')  # Ex: August 8, 2025
 
     releases = soup.find_all(class_="release-date__wrapper") #gathers all of the releases
