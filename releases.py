@@ -13,7 +13,7 @@ def getReleases():
 
     #gets tomorrow's date to compare against the release dates
     tomorrow = datetime.now() + timedelta(days=2)
-    tomorrow_str = tomorrow.strftime('%B %-d, %Y')  # Example: August 8, 2025
+    tomorrow_str = tomorrow.strftime('%B %-d, %Y')  # Ex: August 8, 2025
 
     releases = soup.find_all(class_="release-date__wrapper") #gathers all of the releases
     sneakers=[] #gatheres only the sneakers that release tomorrow
