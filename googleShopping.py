@@ -9,11 +9,12 @@ import time
 import os
 import requests
 from difflib import SequenceMatcher
+import statistics
 
 def similar(a, b):
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
-def getLivePriceGoogle(name:str, productID: str, colorway:str):
+def getLivePriceGoogle(name:str, style: str, colorway:str):
     
     
     service = Service()
@@ -43,7 +44,7 @@ def getLivePriceGoogle(name:str, productID: str, colorway:str):
             EC.element_to_be_clickable((By.CSS_SELECTOR, "textarea.gLFyf"))
         )
         searchBar.clear()
-        searchBar.send_keys(f"{name} {productID} {colorway}" + Keys.RETURN)
+        searchBar.send_keys(f"{name} {style} {colorway}" + Keys.RETURN)
         time.sleep(1)  # Wait for search results to load
         
         #Gets all product containers
@@ -93,18 +94,29 @@ def getLivePriceGoogle(name:str, productID: str, colorway:str):
                     first_ebay_found = True
             except Exception:
                 continue
+        #Filters the prices so that nothing outrageous is included
+        allPrices= [price for title, price, seller in filtered_products]
+        if allPrices:
+            medianPrice= statistics.median(allPrices)
+            allowedProducts= []
+            for title, price, seller in filtered_products:
+                if (medianPrice * 0.75 <= price) and (medianPrice * 1.6 >= price): #if the withing 75% and 160% of the median Price it is allowed
+                    allowedProducts.append((title,price,seller))
+        else:
+            allowedProducts=[]
+            
+
         #Gets the average price of the filtered products
         totalPrice = 0
-        # print("Filtered Products:") #TESTING
-        for title, price, colorway in filtered_products:
+        print("Filtered Google Shopping Products:") #TESTING
+        for title, price, seller in allowedProducts:
             totalPrice += price
-            # print(f"{title} - ${price} ({seller})") #TESTING 
-        # print(f"Average Price: ${totalPrice / len(filtered_products) if filtered_products else 0:.2f}") #TESTING
+            print(f"{title} - ${price} ({seller})") #TESTING 
     #Closes Chrome Driver
     finally:
         driver.quit()
    
     #Returns the average price via Google Shopping
-    return totalPrice / len(filtered_products) if filtered_products else 0
+    return totalPrice / len(allowedProducts) if allowedProducts else 0
 
 # getLivePriceGoogle('New Balance 204L "Timberwolf/Linen', 'U204LMMC', 'Timberwolf/Linen')  #TESTING

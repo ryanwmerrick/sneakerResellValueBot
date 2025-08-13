@@ -13,12 +13,17 @@ from googleShopping import getLivePriceGoogle
 import math
 
 
-def getLivePrice(productID: str, name:str, colorway:str, save_dir="images"):
+def getLivePrice(name:str, style: str, colorway:str, save_dir="images"):
     # Get SoleRetriever price (and image path, ignored here)
-    livePriceSoleRetriever, imagePath = getLivePriceImageSoleRetreiver(productID)
+    livePriceSoleRetriever, imagePath = getLivePriceImageSoleRetreiver(style)
+    print('-----------------------------')
+    print(f"SoleRetreiver Price: {livePriceSoleRetriever}")
 
     # Get Google Shopping price
-    livePriceGoogle = getLivePriceGoogle(name, productID, colorway)
+    livePriceGoogle = getLivePriceGoogle(name, style, colorway)
+    
+    #PRINT STATEMENTS
+    print(f"Google Shopping Price: {livePriceGoogle}")
     
     totalPrice = 0
     totalWeight = 0
@@ -38,9 +43,12 @@ def getLivePrice(productID: str, name:str, colorway:str, save_dir="images"):
 
     # If no valid prices were found, return 0
     if totalWeight == 0:
-        return 0 
+        return 0
+    
+    print(f'Total Live Price: {totalPrice / totalWeight}')
 
     return (totalPrice / totalWeight), imagePath
+
 
 
 

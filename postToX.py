@@ -33,7 +33,7 @@ def getAPI():
 #Creates and Posts the Tweet
 def createTweet(sneaker):
     # Gets the live price and image paths
-    livePrice, imagePath = getLivePrice(sneaker["style"], sneaker['name'], sneaker['colorway'])
+    livePrice, imagePath = getLivePrice( sneaker['name'], sneaker["style"], sneaker['colorway'])
     hypeLevel, lowPoint, highPoint= resellPrediction(sneaker["retailPrice"], livePrice)
     
     # TWEET TEXT
@@ -94,6 +94,10 @@ def createTweet(sneaker):
             client.create_tweet(text=tweetText)
     except Exception as e:
         print(f"Failed to post tweet: {e}")
+        
+    print('-----------------------------')
+    print('POSTED TWEET:')
+    print(f'{tweetText}')
     
 
 #MAIN EXECUTIONS
