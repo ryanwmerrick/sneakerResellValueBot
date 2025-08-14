@@ -17,6 +17,7 @@ def create_driver():
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
+    options.add_argument("--headless=new")
     options.add_argument("--window-size=1920,1080")
     options.add_argument(
         "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -119,4 +120,4 @@ def getLivePriceGoogle(name:str, style: str, colorway:str):
     #Returns the average price via Google Shopping
     return totalPrice / len(allowedProducts) if allowedProducts else 0
 
-# getLivePriceGoogle('Nike Air Foamposite One "Cough Drop"','IB2219-001','Black/Varsity Red') #TESTING
+# getLivePriceGoogle('Nike Air Foamposite One "Cough Drop"','IB2219-001','Black/Varsity Red')
