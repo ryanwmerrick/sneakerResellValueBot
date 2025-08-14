@@ -26,8 +26,16 @@ jobs:
       - name: Install Google Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: stable
-
+          chrome-version: 115.0.5790.170  # your local Chrome version
+          
+      - name: Install ChromeDriver
+        uses: nanasess/setup-chromedriver@v2
+        with:
+          chromedriver-version: 115.0.5790.170  # must match Chrome
+      - name: Check Chrome & ChromeDriver versions
+        run: |
+          google-chrome --version
+          chromedriver --version
 
       - name: Run sneaker bot script
         env:
