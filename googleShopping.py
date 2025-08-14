@@ -119,4 +119,4 @@ def getLivePriceGoogle(name:str, style: str, colorway:str):
     #Returns the average price via Google Shopping
     return totalPrice / len(allowedProducts) if allowedProducts else 0
 
-getLivePriceGoogle('Nike Air Foamposite One "Cough Drop"','IB2219-001','Black/Varsity Red')
+# getLivePriceGoogle('Nike Air Foamposite One "Cough Drop"','IB2219-001','Black/Varsity Red') #TESTING
