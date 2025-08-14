@@ -2,8 +2,8 @@ name: Sneaker Bot Daily Run
 
 on:
   schedule:
-    - cron: '0 17 * * *'  # 
-  workflow_dispatch:     # Allows manual run from GitHub UI
+    - cron: '0 17 * * *'  
+  workflow_dispatch:     
 
 jobs:
   run-sneaker-bot:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.13
+          python-version: 3.11   # Selenium stable with 3.11, avoid 3.13 for now
 
       - name: Install dependencies
         run: |
@@ -25,11 +25,12 @@ jobs:
 
       - name: Install Google Chrome
         run: |
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt install ./google-chrome-stable_current_amd64.deb
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
-      - name: Install chromedriver
-        uses: nanasess/setup-chromedriver@v2
+      - name: Install Chromedriver
+        run: |
+          sudo apt-get install -y chromium-chromedriver
 
       - name: Run sneaker bot script
         env:
