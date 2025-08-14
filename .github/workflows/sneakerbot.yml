@@ -23,15 +23,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Google Chrome
+      - name: Set up Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: 115.0.5790.170  # your local Chrome version
-          
-      - name: Install ChromeDriver
+          chrome-version: stable
+
+      - name: Set up ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: 115.0.5790.170  # must match Chrome
+          chromedriver-version: stable
+
       - name: Check Chrome & ChromeDriver versions
         run: |
           google-chrome --version
