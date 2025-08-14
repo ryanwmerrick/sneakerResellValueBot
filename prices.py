@@ -29,7 +29,11 @@ def getLivePrice(name:str, style: str, colorway:str, save_dir="images"):
     totalWeight = 0
 
     soleRetrieverWeight = 3
-    googleShoppingWeight = 1
+    #if the google Price is less than 70% or more than 160% of the SoleRetreiver price, ignore it
+    if(livePriceSoleRetriever * 0.7 >= livePriceGoogle) or (livePriceSoleRetriever * 1.6 <= livePriceGoogle):
+        googleShoppingWeight=0
+    else: 
+        googleShoppingWeight = 1
 
     # Add SoleRetriever price if not zero
     if livePriceSoleRetriever > 0:

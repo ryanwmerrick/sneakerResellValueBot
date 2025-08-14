@@ -18,13 +18,13 @@ if releases:
         
 #TEST CUSTOM RELEASE
 
-sneaker={
-    'name': 'Air Jordan 14 Golf "Hyper Royal"',
-    'style':'HJ7710-101',
-    'colorway':'White/Black/Hyper Royal'
-}
+# sneaker={
+#     'name': 'Air Jordan 14 Golf "Hyper Royal"',
+#     'style':'HJ7710-101',
+#     'colorway':'White/Black/Hyper Royal'
+# }
 
-getLivePrice(sneaker['name'], sneaker['style'], sneaker['colorway'])
+# getLivePrice(sneaker['name'], sneaker['style'], sneaker['colorway'])
 
 
 

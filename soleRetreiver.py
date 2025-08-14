@@ -52,22 +52,17 @@ def getLivePriceImageSoleRetreiver(productID: str, save_dir="images"):
             EC.visibility_of_element_located((By.CSS_SELECTOR, "span.text-turquoise-500"))
         ).text.strip("$") #removes dollar sign
         
+        # Scroll to the bottom of the page to load all lazy images
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(2)  # give some time for images to load
+
+        
+        
         # Find the main large image
-        main_img = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((
-                By.XPATH,
-                "//div[contains(@class, 'flex') and contains(@class, 'items-center') and contains(@class, 'justify-center')]/img"
-            ))
-        )
-
-        # Get the largest version from srcset if available
-        srcset = main_img.get_attribute("srcset")
-        if srcset:
-            image_url = srcset.split(",")[-1].strip().split(" ")[0]
-        else:
-            image_url = main_img.get_attribute("src")
-
-        # Save image
+         # Grab the first image in the main grid
+        mainImages = driver.find_elements(By.CSS_SELECTOR, "img.w-full.cursor-pointer.rounded-md")[:4]
+        print(f"FOUND{len(mainImages)} IMAGES")
+        
         os.makedirs(save_dir, exist_ok=True)
         headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -75,18 +70,28 @@ def getLivePriceImageSoleRetreiver(productID: str, save_dir="images"):
                           "Chrome/115.0.0.0 Safari/537.36"
         }
 
-        img_path = os.path.join(save_dir, f"{productID}.jpg")
-        response = requests.get(image_url, headers=headers)
-        if response.status_code == 200:
-            with open(img_path, "wb") as f:
-                f.write(response.content)
-            print(f"Downloaded high-res image: {img_path}")
-        else:
-            print(f"Failed to download image {image_url} - Status code: {response.status_code}")
+        img_paths = []
+        for idx, img in enumerate(mainImages, start=1):
+            srcset = img.get_attribute("srcset")
+            if srcset:
+                image_url = srcset.split(",")[-1].strip().split(" ")[0]
+            else:
+                image_url = img.get_attribute("src")
 
-        
+            img_path = os.path.join(save_dir, f"{productID}_{idx}.jpg")
+            response = requests.get(image_url, headers=headers)
+            if response.status_code == 200:
+                with open(img_path, "wb") as f:
+                    f.write(response.content)
+                img_paths.append(img_path)
+                print(f"Downloaded high-res image: {img_path}")
+            else:
+                print(f"Failed to download image {image_url} - Status code: {response.status_code}")
+
     #Closes Chrome Driver
     finally:
         driver.quit()
     #Returns the live price and image path from Sole Retreiver 
-    return float(livePrice), img_path
+    return float(livePrice), img_paths
+
+# getLivePriceImageSoleRetreiver("U204LMMC") #TESTING

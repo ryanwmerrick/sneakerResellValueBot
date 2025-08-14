@@ -33,7 +33,7 @@ def getAPI():
 #Creates and Posts the Tweet
 def createTweet(sneaker):
     # Gets the live price and image paths
-    livePrice, imagePath = getLivePrice( sneaker['name'], sneaker["style"], sneaker['colorway'])
+    livePrice, imagePaths = getLivePrice( sneaker['name'], sneaker["style"], sneaker['colorway'])
     hypeLevel, lowPoint, highPoint= resellPrediction(sneaker["retailPrice"], livePrice)
     
     # TWEET TEXT
@@ -62,38 +62,28 @@ def createTweet(sneaker):
 
     # Upload the image if it exists
     api = getAPI()
-    media_ids = []
-    if imagePath:
+    mediaIDs = []
+    if imagePaths:
+        for imagePath in imagePaths
+            try:
+                media = api.media_upload(imagePath)
+                mediaIDs.append(media.media_id)
+            except Exception as e:
+                print(f"Failed to upload {imagePath}: {e}")
+
+
+
+        # Post Tweet with media if we have any uploaded successfully
+        client = getClient()
         try:
-            # Open the image and convert it to RGBA (to determine if transparent)
-            img = Image.open(imagePath).convert("RGBA")
-            # Create a white background and paste the image onto it
-            white_bg = Image.new("RGB", img.size, (255, 255, 255))
-            # Use White Background as mask if transparent, else paste without mask
-            if img.mode == "RGBA":
-                white_bg.paste(img, mask=img.split()[3])  # White Background with transparency
+            if mediaIDs:
+                client.create_tweet(text=tweetText, mediaIDs=mediaIDs)
+                print("Tweet posted successfully!")
             else:
-                white_bg.paste(img)
-            # Save the image with a fixed name
-            fixed_path = imagePath.replace('.jpg', '_fixed.jpg')
-            white_bg.save(fixed_path, format='JPEG')
-            media = api.media_upload(fixed_path)
-            media_ids.append(media.media_id)
+                print("No valid media to upload; posting tweet without media.")
+                client.create_tweet(text=tweetText)
         except Exception as e:
-            print(f"Failed to process/upload {imagePath}: {e}")
-
-
-    # Post Tweet with media if we have any uploaded successfully
-    client = getClient()
-    try:
-        if media_ids:
-            client.create_tweet(text=tweetText, media_ids=media_ids)
-            print("Tweet posted successfully!")
-        else:
-            print("No valid media to upload; posting tweet without media.")
-            client.create_tweet(text=tweetText)
-    except Exception as e:
-        print(f"Failed to post tweet: {e}")
+            print(f"Failed to post tweet: {e}")
         
     print('-----------------------------')
     print('POSTED TWEET:')

@@ -10,16 +10,19 @@ import os
 import requests
 from difflib import SequenceMatcher
 import statistics
+import shutil
 
-def similar(a, b):
-    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+def get_chromedriver_service():
+    # Check if running in GitHub Actions
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        # GitHub Actions chromedriver location
+        chrome_driver_path = shutil.which("chromedriver") or "/usr/bin/chromedriver"
+        return Service(chrome_driver_path)
+    else:
+        # Local: let Selenium Manager auto-download the right driver
+        return Service()
 
-def getLivePriceGoogle(name:str, style: str, colorway:str):
-    
-    
-    service = Service()
-
-    #Makes Chrome Undetectable and Not Visible
+def create_driver():
     options = Options()
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -32,7 +35,13 @@ def getLivePriceGoogle(name:str, style: str, colorway:str):
         "Chrome/115.0.0.0 Safari/537.36"
     )
 
-    driver = webdriver.Chrome(service=service, options=options)
+    service = get_chromedriver_service()
+    return webdriver.Chrome(service=service, options=options)
+
+def getLivePriceGoogle(name:str, style: str, colorway:str):
+    
+    
+    driver = create_driver() 
 
     try:
         #Searches Google Shopping for the sneaker
@@ -119,4 +128,4 @@ def getLivePriceGoogle(name:str, style: str, colorway:str):
     #Returns the average price via Google Shopping
     return totalPrice / len(allowedProducts) if allowedProducts else 0
 
-# getLivePriceGoogle('New Balance 204L "Timberwolf/Linen', 'U204LMMC', 'Timberwolf/Linen')  #TESTING
+# getLivePriceGoogle('Nike Air Foamposite One "Cough Drop"','IB2219-001','Black/Varsity Red') #TESTING
