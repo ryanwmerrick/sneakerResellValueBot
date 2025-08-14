@@ -84,7 +84,7 @@ def createTweet(sneaker):
     client = getClient()
     try:
         if mediaIDs:
-            client.create_tweet(text=tweetText, mediaIDs=mediaIDs)
+            client.create_tweet(text=tweetText, media_ids=mediaIDs)
             print("Tweet posted successfully!")
         else:
             print("No valid media to upload; posting tweet without media.")
