@@ -1,28 +1,22 @@
 name: Sneaker Bot Daily Run
 
 on:
-
   schedule:
-
-    - cron: '0 16 * * *'  # 
-
+    - cron: '0 16 * * *'  # Runs daily at 16:00 UTC
   workflow_dispatch:     # Allows manual run from GitHub UI
 
 jobs:
-
   run-sneaker-bot:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.13
+          python-version: 3.11
 
       - name: Install dependencies
         run: |
@@ -31,11 +25,10 @@ jobs:
 
       - name: Install Google Chrome
         run: |
+          sudo apt update
+          sudo apt install -y wget unzip xvfb libxi6 libgconf-2-4 default-jdk
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt install ./google-chrome-stable_current_amd64.deb
-          
-      - name: Install chromedriver
-        uses: nanasess/setup-chromedriver@v2
+          sudo apt install -y ./google-chrome-stable_current_amd64.deb
 
       - name: Run sneaker bot script
         env:
@@ -43,6 +36,7 @@ jobs:
           consumer_secret: ${{ secrets.consumer_secret }}
           access_token: ${{ secrets.access_token }}
           access_token_secret: ${{ secrets.access_token_secret }}
-        run: python postToX.py
-
-
+        run: |
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1920x1080x24 &
+          python postToX.py
