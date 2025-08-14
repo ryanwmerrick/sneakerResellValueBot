@@ -37,7 +37,7 @@ def getLivePriceGoogle(name:str, style: str, colorway:str):
     try:
         #Searches Google Shopping for the sneaker
         driver.get("https://google.com/shopping")
-        time.sleep(1) #waits for page to load
+        time.sleep(3) #waits for page to load
     
         # Wait for search input and enters the sneaker name, product ID, and colorway into search bar
         searchBar = WebDriverWait(driver, 10).until(
@@ -45,7 +45,8 @@ def getLivePriceGoogle(name:str, style: str, colorway:str):
         )
         searchBar.clear()
         searchBar.send_keys(f"{name} {style} {colorway}" + Keys.RETURN)
-        time.sleep(1)  # Wait for search results to load
+        time.sleep(3
+                   )  # Wait for search results to load
         
         #Gets all product containers
         product_containers = driver.find_elements(By.CSS_SELECTOR, "div.UC8ZCe.QS8Cxb")
@@ -119,4 +120,4 @@ def getLivePriceGoogle(name:str, style: str, colorway:str):
     #Returns the average price via Google Shopping
     return totalPrice / len(allowedProducts) if allowedProducts else 0
 
-# getLivePriceGoogle('Nike Air Foamposite One "Cough Drop"','IB2219-001','Black/Varsity Red')
+getLivePriceGoogle('Nike Air Foamposite One "Cough Drop"','IB2219-001','Black/Varsity Red')
