@@ -8,6 +8,7 @@ from releases import getReleases
 #FOR LIVE PRICE PARSING FROM SOLERETRIEVER
 from prices import getLivePrice, resellPrediction
 from PIL import Image
+from datetime import datetime, timedelta
 
 #Loading API keys from .env file
 load_dotenv()
@@ -44,18 +45,26 @@ def createTweet(sneaker):
         f'Current Average Live Price: ${int(livePrice)}\n'
         f'Resell: {hypeLevel}\n'
         f'Resell Prediction: ${lowPoint}-${highPoint}\n'
-        f'Release Date: {sneaker["releaseDate"]}'
+        f'Release Date: TOMORROW ({sneaker["releaseDate"]})'
     )
     tweetTextWithoutPrediction = (
         f'{sneaker["name"]}\n'
         f'Colorway: {sneaker["colorway"]}\n'
         f'Retail Price: ${sneaker["retailPrice"]}\n'
-        f'Release Date: {sneaker["releaseDate"]}'
+        f'Release Date: TOMORROW ({sneaker["releaseDate"]})'
     )
-    # If Live Price or Resale Predictions is 0, we don't include the prediction
+    tomorrow = datetime.now() + timedelta(days=1)
+    tomorrow_str = tomorrow.strftime('%B %-d, %Y')
+    tweetTextNoReleases= (
+        f'👟❌ No significant sneaker drops tomorrow ({tomorrow_str}) 👟❌\n'
+        f'🕒🔥 Check back tomorrow for the next drops! 🕒🔥'
+    )
+    # If Live Price or Resale Predictions is 0, we don't include the prediction. If no releases, use no release message
     tweetText = ""
     if(livePrice != 0 and lowPoint != 0 and highPoint != 0):
         tweetText=tweetTextWithPrediction
+    elif (sneaker=="None"):
+        tweetText=tweetTextNoReleases
     else:
         tweetText=tweetTextWithoutPrediction
     
@@ -64,26 +73,24 @@ def createTweet(sneaker):
     api = getAPI()
     mediaIDs = []
     if imagePaths:
-        for imagePath in imagePaths
+        for imagePath in imagePaths:
             try:
                 media = api.media_upload(imagePath)
                 mediaIDs.append(media.media_id)
             except Exception as e:
                 print(f"Failed to upload {imagePath}: {e}")
-
-
-
-        # Post Tweet with media if we have any uploaded successfully
-        client = getClient()
-        try:
-            if mediaIDs:
-                client.create_tweet(text=tweetText, mediaIDs=mediaIDs)
-                print("Tweet posted successfully!")
-            else:
-                print("No valid media to upload; posting tweet without media.")
-                client.create_tweet(text=tweetText)
-        except Exception as e:
-            print(f"Failed to post tweet: {e}")
+                
+    # Post Tweet with media if we have any uploaded successfully
+    client = getClient()
+    try:
+        if mediaIDs:
+            client.create_tweet(text=tweetText, mediaIDs=mediaIDs)
+            print("Tweet posted successfully!")
+        else:
+            print("No valid media to upload; posting tweet without media.")
+            client.create_tweet(text=tweetText)
+    except Exception as e:
+        print(f"Failed to post tweet: {e}")
         
     print('-----------------------------')
     print('POSTED TWEET:')
@@ -96,7 +103,7 @@ if sneakers:
     for sneaker in sneakers:
         createTweet(sneaker)
 else:
-    print("No sneaker releases found for tomorrow.")
+    createTweet("None")
 
 
 
