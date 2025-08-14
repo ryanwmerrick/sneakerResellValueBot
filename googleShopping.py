@@ -12,40 +12,23 @@ from difflib import SequenceMatcher
 import statistics
 import shutil
 
-def get_chromedriver_service():
-    """
-    Returns a Service object for ChromeDriver.
-    In GitHub Actions, uses the pre-installed chromedriver in PATH.
-    Locally, lets Selenium Manager download automatically if not found.
-    """
-    # Try to find chromedriver in PATH (GitHub Actions installs it here)
-    chrome_driver_path = shutil.which("chromedriver")
-    if chrome_driver_path:
-        return Service(chrome_driver_path)
-    # Fallback to Selenium Manager auto-download
-    return Service()
-
 def create_driver(headless=True):
-    """
-    Creates a Chrome WebDriver with options for automation.
-    Set headless=False to see the browser (good for debugging).
-    """
     options = Options()
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option("useAutomationExtension", False)
+    options.add_experimental_option('useAutomationExtension', False)
     if headless:
-        options.add_argument("--headless=new")  # use new headless mode
+        options.add_argument("--headless=new")
     options.add_argument("--window-size=1920,1080")
     options.add_argument(
         "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/115.0.0.0 Safari/537.36"
+        "Chrome/138.0.7204.183 Safari/537.36"
     )
 
-    service = get_chromedriver_service()
+    # Use chromedriver from PATH (installed via GitHub Action)
+    service = Service()
     return webdriver.Chrome(service=service, options=options)
-
 
 def getLivePriceGoogle(name:str, style: str, colorway:str):
     
