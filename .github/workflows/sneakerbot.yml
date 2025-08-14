@@ -25,15 +25,16 @@ jobs:
 
       - name: Install Google Chrome
         run: |
-          CHROME_VERSION=138.0.7204.183
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt install -y ./google-chrome-stable_current_amd64.deb
-          google-chrome --version
+          google-chrome --version  # confirms version
 
-      - name: Install matching ChromeDriver
+      - name: Install ChromeDriver matching installed Chrome
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: 138.0.7204.183
+          chrome-version: stable
+
+
 
       - name: Run sneaker bot
         env:
