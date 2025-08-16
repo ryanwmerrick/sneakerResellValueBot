@@ -31,6 +31,15 @@ def getAPI():
     )
     return tweepy.API(auth)
 
+def standardize_image(image_path):
+    try:
+        with Image.open(image_path) as img:
+            rgb_image = img.convert("RGB")  # ensures it's in RGB mode
+            rgb_image.save(image_path, format="JPEG")  # overwrite as JPEG
+    except Exception as e:
+        print(f"Failed to standardize {image_path}: {e}")
+
+
 #Creates and Posts the Tweet
 def createTweet(sneaker):
     # Gets the live price and image paths
@@ -66,28 +75,29 @@ def createTweet(sneaker):
     mediaIDs = []
     if imagePaths:
         for imagePath in imagePaths:
+            standardize_image(imagePath)
             try:
                 media = api.media_upload(imagePath)
                 mediaIDs.append(media.media_id)
             except Exception as e:
                 print(f"Failed to upload {imagePath}: {e}")
                 
-    # Post Tweet with media if we have any uploaded successfully
-    client = getClient()
-    try:
-        if mediaIDs:
-            client.create_tweet(text=tweetText, media_ids=mediaIDs)
-            print("Tweet posted successfully!")
-        else:
-            print("No valid media to upload; posting tweet without media.")
-            client.create_tweet(text=tweetText)
-    except Exception as e:
-        print(f"Failed to post tweet: {e}")
+
+    # # Post Tweet with media if we have any uploaded successfully
+    # client = getClient()
+    # try:
+    #     if mediaIDs:
+    #         client.create_tweet(text=tweetText, media_ids=mediaIDs)
+    #         print("Tweet posted successfully!")
+    #     else:
+    #         print("No valid media to upload; posting tweet without media.")
+    #         client.create_tweet(text=tweetText)
+    # except Exception as e:
+    #     print(f"Failed to post tweet: {e}")
         
-    print('-----------------------------')
-    print('POSTED TWEET:')
-    print(f'{tweetText}')
-    
+    # print('-----------------------------')
+    # print('POSTED TWEET:')
+    # print(f'{tweetText}')
 
 #MAIN EXECUTIONS
 sneakers = getReleases()  # Gets the list of sneakers releasing tomorrow
@@ -103,6 +113,7 @@ else:
     )
     client = getClient()
     client.create_tweet(text=tweetTextNoReleases)
+    print("NO RELEASES TOMORROW")
     
     
 
