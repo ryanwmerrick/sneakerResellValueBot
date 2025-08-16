@@ -34,7 +34,7 @@ def getAPI():
 #Creates and Posts the Tweet
 def createTweet(sneaker):
     # Gets the live price and image paths
-    livePrice, imagePaths = getLivePrice( sneaker['name'], sneaker["style"], sneaker['colorway'])
+    livePrice, imagePaths = getLivePrice(sneaker['name'], sneaker['style'], sneaker['colorway'])
     hypeLevel, lowPoint, highPoint= resellPrediction(sneaker["retailPrice"], livePrice)
     
     # TWEET TEXT
@@ -53,22 +53,14 @@ def createTweet(sneaker):
         f'Retail Price: ${sneaker["retailPrice"]}\n'
         f'Release Date: TOMORROW ({sneaker["releaseDate"]})'
     )
-    tomorrow = datetime.now() + timedelta(days=1)
-    tomorrow_str = tomorrow.strftime('%B %-d, %Y')
-    tweetTextNoReleases= (
-        f'👟❌ No significant sneaker drops tomorrow ({tomorrow_str}) 👟❌\n'
-        f'🕒🔥 Check back tomorrow for the next drops! 🕒🔥'
-    )
+    
     # If Live Price or Resale Predictions is 0, we don't include the prediction. If no releases, use no release message
     tweetText = ""
     if(livePrice != 0 and lowPoint != 0 and highPoint != 0):
         tweetText=tweetTextWithPrediction
-    elif (sneaker=="None"):
-        tweetText=tweetTextNoReleases
     else:
         tweetText=tweetTextWithoutPrediction
     
-
     # Upload the image if it exists
     api = getAPI()
     mediaIDs = []
@@ -103,7 +95,16 @@ if sneakers:
     for sneaker in sneakers:
         createTweet(sneaker)
 else:
-    createTweet("None")
+    tomorrow = datetime.now() + timedelta(days=1)
+    tomorrow_str = tomorrow.strftime('%B %-d, %Y')
+    tweetTextNoReleases= (
+        f'👟❌ No significant sneaker drops tomorrow ({tomorrow_str}) 👟❌\n'
+        f'🕒🔥 Check back tomorrow for the next drops! 🕒🔥'
+    )
+    client = getClient()
+    client.create_tweet(text=tweetTextNoReleases)
+    
+    
 
 
 
