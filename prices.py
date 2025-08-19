@@ -20,41 +20,38 @@ def getLivePrice(name:str, style: str, colorway:str, save_dir="images"):
     print(f"SoleRetreiver Price: {livePriceSoleRetriever}")
 
     # Get Google Shopping price
-    livePriceGoogle = getLivePriceGoogle(name, style, colorway)
+    # livePriceGoogle = getLivePriceGoogle(name, style, colorway)
     
-    #PRINT STATEMENTS
-    print(f"Google Shopping Price: {livePriceGoogle}")
+    # #PRINT STATEMENTS
+    # print(f"Google Shopping Price: {livePriceGoogle}")
     
-    totalPrice = 0
-    totalWeight = 0
+    # totalPrice = 0
+    # totalWeight = 0
 
-    soleRetrieverWeight = 3
-    #if the google Price is less than 70% or more than 160% of the SoleRetreiver price, ignore it
-    if(livePriceSoleRetriever * 0.7 >= livePriceGoogle) or (livePriceSoleRetriever * 1.6 <= livePriceGoogle):
-        googleShoppingWeight=0
-    else: 
-        googleShoppingWeight = 1
+    # soleRetrieverWeight = 3
+    # #if the google Price is less than 70% or more than 160% of the SoleRetreiver price, ignore it
+    # if(livePriceSoleRetriever * 0.7 >= livePriceGoogle) or (livePriceSoleRetriever * 1.6 <= livePriceGoogle):
+    #     googleShoppingWeight=0
+    # else: 
+    #     googleShoppingWeight = 1
 
     # Add SoleRetriever price if not zero
-    if livePriceSoleRetriever > 0:
-        totalPrice += livePriceSoleRetriever * soleRetrieverWeight
-        totalWeight += soleRetrieverWeight
+    # if livePriceSoleRetriever > 0:
+    #     totalPrice += livePriceSoleRetriever * soleRetrieverWeight
+    #     totalWeight += soleRetrieverWeight
 
     # Add Google Shopping price if not zero
-    if livePriceGoogle > 0:
-        totalPrice += livePriceGoogle * googleShoppingWeight
-        totalWeight += googleShoppingWeight
+    # if livePriceGoogle > 0:
+    #     totalPrice += livePriceGoogle * googleShoppingWeight
+    #     totalWeight += googleShoppingWeight
 
     # If no valid prices were found, return 0
-    if totalWeight == 0:
-        return 0
+    # if totalWeight == 0:
+    #     return 0.
     
-    print(f'Total Live Price: {totalPrice / totalWeight}')
+    print(f'Total Live Price: {livePriceSoleRetriever}')
 
-    return (totalPrice / totalWeight), imagePath
-
-
-
+    return livePriceSoleRetriever, imagePath
 
 def resellPrediction(retail, livePrice):
     

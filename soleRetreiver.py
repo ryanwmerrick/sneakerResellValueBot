@@ -39,25 +39,26 @@ def getLivePriceImageSoleRetreiver(productID: str, save_dir="images"):
         searchBar.send_keys(f"{productID}" + Keys.RETURN)
         time.sleep(1)  # Wait for search results to load
 
-        # Wait for the clickable <a> link that includes the Product ID
-        container = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.XPATH, f"//a[contains(@href, '{productID.lower()}')]/ancestor::div[contains(@class, 'full-grid-item block group transition-opacity h-full place-self-stretch relative')]"))
-        )
-        link = container.find_element(By.CSS_SELECTOR, f'a[href*="{productID.lower()}"]')
-        driver.execute_script("arguments[0].click();", link)
+        # Try to locate product container
+        try:
+            container = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, f"//a[contains(@href, '{productID.lower()}')]/ancestor::div[contains(@class, 'full-grid-item')]"))
+            )
+            link = container.find_element(By.CSS_SELECTOR, f'a[href*="{productID.lower()}"]')
+            driver.execute_script("arguments[0].click();", link)
+        except Exception:
+            print(f"Product ID: {productID} not found in search results, SKIPPING")
+            return 0.0, []
 
-    
         # Wait for the live price span to be visible
         livePrice = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, "span.text-turquoise-500"))
         ).text.strip("$") #removes dollar sign
-        
+
         # Scroll to the bottom of the page to load all lazy images
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)  # give some time for images to load
 
-        
-        
         # Find the main large image
          # Grab the first image in the main grid
         mainImages = driver.find_elements(By.CSS_SELECTOR, "img.w-full.cursor-pointer.rounded-md")[:4]

@@ -44,6 +44,10 @@ def standardize_image(image_path):
 def createTweet(sneaker):
     # Gets the live price and image paths
     livePrice, imagePaths = getLivePrice(sneaker['name'], sneaker['style'], sneaker['colorway'])
+    if(livePrice==0.0 and imagePaths==[]):
+        return
+        
+    
     hypeLevel, lowPoint, highPoint= resellPrediction(sneaker["retailPrice"], livePrice)
     
     # TWEET TEXT
@@ -73,7 +77,7 @@ def createTweet(sneaker):
     # Upload the image if it exists
     api = getAPI()
     mediaIDs = []
-    if imagePaths:
+    if len(imagePaths)!=0:
         for imagePath in imagePaths:
             standardize_image(imagePath)
             try:
@@ -84,20 +88,20 @@ def createTweet(sneaker):
                 
 
     # # Post Tweet with media if we have any uploaded successfully
-    # client = getClient()
-    # try:
-    #     if mediaIDs:
-    #         client.create_tweet(text=tweetText, media_ids=mediaIDs)
-    #         print("Tweet posted successfully!")
-    #     else:
-    #         print("No valid media to upload; posting tweet without media.")
-    #         client.create_tweet(text=tweetText)
-    # except Exception as e:
-    #     print(f"Failed to post tweet: {e}")
+    client = getClient()
+    try:
+        if mediaIDs:
+            client.create_tweet(text=tweetText, media_ids=mediaIDs)
+            print("Tweet posted successfully!")
+        else:
+            print("No valid media to upload; posting tweet without media.")
+            client.create_tweet(text=tweetText)
+    except Exception as e:
+        print(f"Failed to post tweet: {e}")
         
-    # print('-----------------------------')
-    # print('POSTED TWEET:')
-    # print(f'{tweetText}')
+    print('-----------------------------')
+    print('POSTED TWEET:')
+    print(f'{tweetText}')
 
 #MAIN EXECUTIONS
 sneakers = getReleases()  # Gets the list of sneakers releasing tomorrow
