@@ -22,6 +22,7 @@ parsel==1.10.0
 pillow==11.3.0
 PySocks==1.7.1
 python-dotenv==1.1.1
+pytrends==4.9.0
 requests==2.32.4
 requests-oauthlib==2.0.0
 selenium==4.34.2
