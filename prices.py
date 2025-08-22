@@ -10,51 +10,44 @@ import os
 import requests
 from soleRetreiver import getLivePriceImageSoleRetreiver
 from googleShopping import getLivePriceGoogle
+from googleTrends import getGoogleTrendsPrice
 import math
 
 
-def getLivePrice(name:str, style: str, colorway:str, save_dir="images"):
+def getLivePrice(name: str, style: str, colorway: str, retailPrice: int, save_dir="images"):
+
     # Get SoleRetriever price (and image path, ignored here)
     livePriceSoleRetriever, imagePath = getLivePriceImageSoleRetreiver(style)
     print('-----------------------------')
     print(f"SoleRetreiver Price: {livePriceSoleRetriever}")
-
-    # Get Google Shopping price
-    # livePriceGoogle = getLivePriceGoogle(name, style, colorway)
     
-    # #PRINT STATEMENTS
-    # print(f"Google Shopping Price: {livePriceGoogle}")
+    #GOOGLE TRENDS
+    googleTrend = getGoogleTrendsPrice(name)
+    print(f"Google Trends Score: {googleTrend:.2f}")
     
-    # totalPrice = 0
-    # totalWeight = 0
+    # Adjust price based on trend
+    if googleTrend == 0.0:
+        trendFactor = -0.25 # Heavy penalty for dead shoes
+    elif googleTrend <= 0.1:
+        trendFactor = -0.15  # mid penalty for low interest
+    else:
+        trendFactor = min(0.05, math.log1p(googleTrend) / 100)  # Small reward, capped at +5%
 
-    # soleRetrieverWeight = 3
-    # #if the google Price is less than 70% or more than 160% of the SoleRetreiver price, ignore it
-    # if(livePriceSoleRetriever * 0.7 >= livePriceGoogle) or (livePriceSoleRetriever * 1.6 <= livePriceGoogle):
-    #     googleShoppingWeight=0
-    # else: 
-    #     googleShoppingWeight = 1
-
-    # Add SoleRetriever price if not zero
-    # if livePriceSoleRetriever > 0:
-    #     totalPrice += livePriceSoleRetriever * soleRetrieverWeight
-    #     totalWeight += soleRetrieverWeight
-
-    # Add Google Shopping price if not zero
-    # if livePriceGoogle > 0:
-    #     totalPrice += livePriceGoogle * googleShoppingWeight
-    #     totalWeight += googleShoppingWeight
-
-    # If no valid prices were found, return 0
-    # if totalWeight == 0:
-    #     return 0.
     
-    print(f'Total Live Price: {livePriceSoleRetriever}')
+    
+    estimatedPrice = livePriceSoleRetriever * (1 + trendFactor)
 
-    return livePriceSoleRetriever, imagePath
+    # Safeguard floor: not below 90% retail
+    if estimatedPrice < (retailPrice * 0.9):
+        estimatedPrice = int(retailPrice * 0.9)
+        
+    print(f"Adjusted Trend Factor: {trendFactor:.3f}")
+    print(f"Total Estimate Live Price: {estimatedPrice:.2f}")
+
+    return estimatedPrice, imagePath
+
 
 def resellPrediction(retail, livePrice):
-    
     #Initializes variables
     retail = float(retail)
     livePrice = float(livePrice)
@@ -62,17 +55,17 @@ def resellPrediction(retail, livePrice):
     dropFactor=0
     
     #if the live price is 75% more than the retail price, it is considered high hype
-    if livePrice>= retail * 1.75:
+    if livePrice>= retail * 2:
         hype= "✅ High ✅"
-        dropFactor= 0.7
-    #if the live price is 40% more than the retail price, it is considered mid hype
-    elif livePrice>= retail * 1.4:
-        hype= "⚠️ Mid ⚠️"
         dropFactor= 0.6
+    #if the live price is 40% more than the retail price, it is considered mid hype
+    elif livePrice>= retail * 1.6:
+        hype= "⚠️ Mid ⚠️"
+        dropFactor= 0.5
     #if the live price is less than 40% more than the retail price, it is considered low hype
     else:
         hype= "❌ Low ❌"
-        dropFactor=0.5
+        dropFactor=0.4
         
     midPoint= retail + ((livePrice-retail) * dropFactor) #drops the profit by a factor based on the level of hype
     
@@ -84,6 +77,9 @@ def resellPrediction(retail, livePrice):
         return 5 * math.floor(x / 5)
     
     lowPoint= roundDown5(int(midPoint-30)) #low point is 30 less than the mid point (rounded to 2 decimal places)
+    if lowPoint < retail * 0.9:  # Ensure low point is not less than 90% of retail price
+        lowPoint = roundDown5(int(retail * 0.9)) # Ensure low point is not less than retail price
+        
     highPoint= roundDown5(int(midPoint+30)) #high point is 30 more than the mid point (rounded to 2 decimal places)
     
     

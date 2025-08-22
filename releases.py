@@ -60,10 +60,10 @@ def getReleases():
                 "colorway": colorway,
                 "style": style,
                 "releaseDate": releaseDate,
-                "retailPrice": retailPrice.strip("$") if retailPrice else None # removes dollar sign
+                "retailPrice": retailPrice.strip("$") if retailPrice else "?" # removes dollar sign
             }
             #Checks if the release date matches tomorrow's date
-            if releaseDate == tomorrow_str:
+            if releaseDate == tomorrow_str and sneaker['name'] is not None and sneaker['style'] is not None and sneaker['colorway'] is not None and sneaker['retailPrice'] is not None:
                 #If it does, append the sneaker to the sneakers list
                 sneakers.append(sneaker)
     return sneakers

@@ -9,6 +9,7 @@ from releases import getReleases
 from prices import getLivePrice, resellPrediction
 from PIL import Image
 from datetime import datetime, timedelta
+import time
 
 #Loading API keys from .env file
 load_dotenv()
@@ -43,10 +44,9 @@ def standardize_image(image_path):
 #Creates and Posts the Tweet
 def createTweet(sneaker):
     # Gets the live price and image paths
-    livePrice, imagePaths = getLivePrice(sneaker['name'], sneaker['style'], sneaker['colorway'])
+    livePrice, imagePaths = getLivePrice(sneaker['name'], sneaker['style'], sneaker['colorway'], sneaker['retailPrice'])
     if(livePrice==0.0 and imagePaths==[]):
         return
-        
     
     hypeLevel, lowPoint, highPoint= resellPrediction(sneaker["retailPrice"], livePrice)
     
@@ -108,6 +108,7 @@ sneakers = getReleases()  # Gets the list of sneakers releasing tomorrow
 if sneakers:
     for sneaker in sneakers:
         createTweet(sneaker)
+        time.sleep(5)
 else:
     tomorrow = datetime.now() + timedelta(days=1)
     tomorrow_str = tomorrow.strftime('%B %-d, %Y')
