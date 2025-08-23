@@ -13,7 +13,9 @@ releases= getReleases()
 
 if releases:
     for release in releases:
-        getLivePrice(release['name'], release['style'], release['colorway'])
+        getLivePrice(release['name'], release['style'], release['colorway'], release['retailPrice'])
+        
+
         
         
 #TEST CUSTOM RELEASE

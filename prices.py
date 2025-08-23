@@ -14,33 +14,41 @@ from googleTrends import getGoogleTrendsPrice
 import math
 
 
-def getLivePrice(name: str, style: str, colorway: str, retailPrice: int, save_dir="images"):
+def getLivePrice(name: str, style: str, colorway: str, retailPrice, save_dir="images"):
+    """
+    Get live sneaker price and adjust it using Google Trends.
+    Handles None or invalid retailPrice safely.
+    """
+
+    # Ensure retailPrice is usable (convert to int or set to 0 if invalid)
+    try:
+        retailPrice = int(retailPrice)
+    except (TypeError, ValueError):
+        retailPrice = 0
 
     # Get SoleRetriever price (and image path, ignored here)
     livePriceSoleRetriever, imagePath = getLivePriceImageSoleRetreiver(style)
     print('-----------------------------')
     print(f"SoleRetreiver Price: {livePriceSoleRetriever}")
-    
-    #GOOGLE TRENDS
+
+    # GOOGLE TRENDS
     googleTrend = getGoogleTrendsPrice(name)
     print(f"Google Trends Score: {googleTrend:.2f}")
-    
+
     # Adjust price based on trend
     if googleTrend == 0.0:
-        trendFactor = -0.25 # Heavy penalty for dead shoes
+        trendFactor = -0.25  # Heavy penalty for dead shoes
     elif googleTrend <= 0.1:
         trendFactor = -0.15  # mid penalty for low interest
     else:
-        trendFactor = min(0.05, math.log1p(googleTrend) / 100)  # Small reward, capped at +5%
+        trendFactor = min(0.08, math.log1p(googleTrend) / 100)  # Small reward, capped at +8%
 
-    
-    
     estimatedPrice = livePriceSoleRetriever * (1 + trendFactor)
 
-    # Safeguard floor: not below 90% retail
-    if estimatedPrice < (retailPrice * 0.9):
+    # Safeguard floor: not below 90% of retail (only if retailPrice > 0)
+    if retailPrice > 0 and estimatedPrice < (retailPrice * 0.9):
         estimatedPrice = int(retailPrice * 0.9)
-        
+
     print(f"Adjusted Trend Factor: {trendFactor:.3f}")
     print(f"Total Estimate Live Price: {estimatedPrice:.2f}")
 
@@ -48,47 +56,51 @@ def getLivePrice(name: str, style: str, colorway: str, retailPrice: int, save_di
 
 
 def resellPrediction(retail, livePrice):
-    #Initializes variables
-    retail = float(retail)
-    livePrice = float(livePrice)
-    hype=None
-    dropFactor=0
-    
-    #if the live price is 75% more than the retail price, it is considered high hype
-    if livePrice>= retail * 2:
-        hype= "✅ High ✅"
-        dropFactor= 0.6
-    #if the live price is 40% more than the retail price, it is considered mid hype
-    elif livePrice>= retail * 1.6:
-        hype= "⚠️ Mid ⚠️"
-        dropFactor= 0.5
-    #if the live price is less than 40% more than the retail price, it is considered low hype
+    """
+    Predict resell hype level and price range based on retail & live price.
+    """
+    try:
+        retail = float(retail)
+    except (TypeError, ValueError):
+        retail = 0.0
+
+    try:
+        livePrice = float(livePrice)
+    except (TypeError, ValueError):
+        livePrice = 0.0
+
+    hype = None
+    dropFactor = 0
+
+    # Hype levels
+    if retail > 0:
+        if livePrice >= retail * 2:
+            hype = "✅ High ✅"
+            dropFactor = 0.6
+        elif livePrice >= retail * 1.6:
+            hype = "⚠️ Mid ⚠️"
+            dropFactor = 0.5
+        else:
+            hype = "❌ Low ❌"
+            dropFactor = 0.4
     else:
-        hype= "❌ Low ❌"
-        dropFactor=0.4
-        
-    midPoint= retail + ((livePrice-retail) * dropFactor) #drops the profit by a factor based on the level of hype
-    
+        hype = "❓ Unknown ❓"
+        dropFactor = 0.4
+
+    # Midpoint calculation
+    midPoint = retail + ((livePrice - retail) * dropFactor)
     if midPoint < retail:
         midPoint = retail
-        
-    # Round down to nearest 5
+
+    # Round down helper
     def roundDown5(x):
         return 5 * math.floor(x / 5)
-    
-    lowPoint= roundDown5(int(midPoint-30)) #low point is 30 less than the mid point (rounded to 2 decimal places)
-    if lowPoint < retail * 0.9:  # Ensure low point is not less than 90% of retail price
-        lowPoint = roundDown5(int(retail * 0.9)) # Ensure low point is not less than retail price
-        
-    highPoint= roundDown5(int(midPoint+30)) #high point is 30 more than the mid point (rounded to 2 decimal places)
-    
-    
+
+    # Low / High estimate
+    lowPoint = roundDown5(int(midPoint - 30))
+    if retail > 0 and lowPoint < retail * 0.9:  
+        lowPoint = roundDown5(int(retail * 0.9))
+
+    highPoint = roundDown5(int(midPoint + 30))
+
     return hype, lowPoint, highPoint
-    
-    
-    
-    
-
-         
-
-
