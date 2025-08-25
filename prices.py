@@ -45,10 +45,6 @@ def getLivePrice(name: str, style: str, colorway: str, retailPrice, save_dir="im
 
     estimatedPrice = livePriceSoleRetriever * (1 + trendFactor)
 
-    # Safeguard floor: not below 90% of retail (only if retailPrice > 0)
-    if retailPrice > 0 and estimatedPrice < (retailPrice * 0.9):
-        estimatedPrice = int(retailPrice * 0.9)
-
     print(f"Adjusted Trend Factor: {trendFactor:.3f}")
     print(f"Total Estimate Live Price: {estimatedPrice:.2f}")
 
