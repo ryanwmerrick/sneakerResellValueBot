@@ -41,7 +41,7 @@ def getLivePrice(name: str, style: str, colorway: str, retailPrice, save_dir="im
     elif googleTrend <= 0.1:
         trendFactor = -0.15  # mid penalty for low interest
     else:
-        trendFactor = min(0.08, math.log1p(googleTrend) / 100)  # Small reward, capped at +8%
+        trendFactor = min(0.15, math.log1p(googleTrend) / 50)  # Small reward, capped at +15%
 
     estimatedPrice = livePriceSoleRetriever * (1 + trendFactor)
 

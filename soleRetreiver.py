@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 import time
 import os
 import requests
+from bs4 import BeautifulSoup
 
 def getLivePriceImageSoleRetreiver(productID: str, save_dir="images"):
     service = Service()
@@ -26,6 +27,15 @@ def getLivePriceImageSoleRetreiver(productID: str, save_dir="images"):
     )
 
     driver = webdriver.Chrome(service=service, options=options)
+    
+    #header for beautiful soup image download
+    headers = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/115.0.0.0 Safari/537.36"
+    )
+    }
 
     try:
         driver.get("https://soleretriever.com")
@@ -50,34 +60,35 @@ def getLivePriceImageSoleRetreiver(productID: str, save_dir="images"):
             print(f"Product ID: {productID} not found in search results, SKIPPING")
             return 0.0, []
 
-        # Wait for the live price span to be visible
-        livePrice = WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "span.text-turquoise-500"))
-        ).text.strip("$") #removes dollar sign
-
-        # Scroll to the bottom of the page to load all lazy images
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)  # give some time for images to load
-
-        # Find the main large image
-         # Grab the first image in the main grid
-        mainImages = driver.find_elements(By.CSS_SELECTOR, "img.w-full.cursor-pointer.rounded-md")[:4]
-        print(f"FOUND{len(mainImages)} IMAGES")
         
-        os.makedirs(save_dir, exist_ok=True)
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                          "AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/115.0.0.0 Safari/537.36"
-        }
 
+        #scroll to bottom to load all images
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);") 
+        time.sleep(4) # give some time for images to load
+        #USES BEATIFULSOUP TO SCRAPE THE PAGE
+        
+        html= driver.page_source
+        soup= BeautifulSoup(html, 'html.parser')
+        
+        mainImages = []  # initializes mainImages to avoid reference before assignment error
+        
+        imageSection = soup.find('section', class_="grid")
+
+        
+        if imageSection:
+            print("FOUND IMAGE SECTION")
+            mainImages= imageSection.find_all('img')[:4] #gets the first 4 images (main images)
+            print(f"FOUND {len(mainImages)} IMAGES")
+        
         img_paths = []
+        os.makedirs(save_dir, exist_ok=True)  # ensure the folder exists
+        #Creates images directory if it doesn't exist (copied code for this part to avoid issues with image saving)
         for idx, img in enumerate(mainImages, start=1):
-            srcset = img.get_attribute("srcset")
+            srcset = img.get("srcset")
             if srcset:
                 image_url = srcset.split(",")[-1].strip().split(" ")[0]
             else:
-                image_url = img.get_attribute("src")
+                image_url = img.get("src")
 
             img_path = os.path.join(save_dir, f"{productID}_{idx}.jpg")
             response = requests.get(image_url, headers=headers)
@@ -89,10 +100,20 @@ def getLivePriceImageSoleRetreiver(productID: str, save_dir="images"):
             else:
                 print(f"Failed to download image {image_url} - Status code: {response.status_code}")
 
+        
+        #Get Live Price
+        livePriceElement= soup.find("span", class_="flex items-center justify-center text-turquoise-500 cursor-pointer bg-turquoise-50 rounded font-medium h-6 px-1 -mx-1")
+        if(livePriceElement):
+            livePrice = livePriceElement.text.strip("$")
+        else:
+            livePrice = 0.0
+        print(f"FOUND LIVE PRICE: {livePrice}")
+
+        
     #Closes Chrome Driver
     finally:
         driver.quit()
     #Returns the live price and image path from Sole Retreiver 
     return float(livePrice), img_paths
 
-# getLivePriceImageSoleRetreiver("U204LMMC") #TESTING
+getLivePriceImageSoleRetreiver("DV4982-004") #TESTING
