@@ -116,4 +116,4 @@ def getLivePriceImageSoleRetreiver(productID: str, save_dir="images"):
     #Returns the live price and image path from Sole Retreiver 
     return float(livePrice), img_paths
 
-getLivePriceImageSoleRetreiver("DV4982-004") #TESTING
+# getLivePriceImageSoleRetreiver("DV4982-004") #TESTING
